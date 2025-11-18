@@ -42,11 +42,11 @@ jobs:
       run: |
         mkdir -p artifacts
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-          cp client artifacts/redis-client-linux
-          cp server artifacts/redis-server-linux
+          cp client artifacts/redis-linux/client
+          cp server artifacts/redis-linux/server
         else
-          cp client artifacts/redis-client-macos
-          cp server artifacts/redis-server-macos
+          cp client artifacts/redis-macos/client
+          cp server artifacts/redis-macos/server
         fi
         
     - name: Upload artifacts
@@ -83,10 +83,10 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          release/redis-client-linux
-          release/redis-server-linux
-          release/redis-client-macos
-          release/redis-server-macos
+          release/redis-linux/client
+          release/redis-linux/server
+          release/redis-macos/client
+          release/redis-macos/server
           release/checksums.txt
         name: Release ${{ github.ref_name }}
         body: |
@@ -95,10 +95,8 @@ jobs:
           This release contains compiled binaries for Linux and macOS.
           
           ### Files:
-          - `redis-server-linux`: Server binary for Linux
-          - `redis-client-linux`: Client binary for Linux  
-          - `redis-server-macos`: Server binary for macOS
-          - `redis-client-macos`: Client binary for macOS
+          - `redis-linux`: binaries for Linux
+          - `redis-macos`: binaries for macOS
           - `checksums.txt`: SHA256 checksums for verification
           
           ### Usage:
