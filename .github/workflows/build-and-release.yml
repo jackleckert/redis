@@ -78,8 +78,8 @@ jobs:
         find release-artifacts -type f | sort
         
         # Copy all files and organize them
-        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux release/ || echo "Ubuntu artifacts not found"
-        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos release/ || echo "macOS artifacts not found" 
+        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux release/redis-linux/ || echo "Ubuntu artifacts not found"
+        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos release/redis-macos/ || echo "macOS artifacts not found" 
         
         # Create checksums for all binaries
         find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt || echo "No binaries found for checksums"
