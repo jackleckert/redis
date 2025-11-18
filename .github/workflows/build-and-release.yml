@@ -72,16 +72,22 @@ jobs:
         
     - name: Prepare release assets
       run: |
-        mkdir -p release
+        mkdir -p release/redis-linux release/redis-macos
         # Debug: Show what artifacts we actually have
         echo "=== Artifact structure ==="
         find release-artifacts -type f | sort
         
-        # Copy all files and organize them
-        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux/client release/redis-linux/client
-        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux/server release/redis-linux/server
-        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos/client release/redis-macos/client
-        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos/server release/redis-macos/server
+        # Copy files to the correct locations
+        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/client release/redis-linux/
+        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/server release/redis-linux/
+        cp release-artifacts/redis-binaries-macos-latest/redis-macos/client release/redis-macos/
+        cp release-artifacts/redis-binaries-macos-latest/redis-macos/server release/redis-macos/
+        
+        # Create checksums
+        find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt
+        
+        echo "=== Final release structure ==="
+        find release -type f | sort
         
         
     - name: Create Release
