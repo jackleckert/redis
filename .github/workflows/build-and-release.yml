@@ -72,20 +72,24 @@ jobs:
         
     - name: Prepare release assets
       run: |
-        mkdir -p release
+        mkdir -p release redis-linux redis-macos
         # Debug: Show what artifacts we actually have
         echo "=== Artifact structure ==="
         find release-artifacts -type f | sort
         
-        # Copy and rename files with unique platform-specific names
-        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/client release/redis-client-linux
-        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/server release/redis-server-linux
-        cp release-artifacts/redis-binaries-macos-latest/redis-macos/client release/redis-client-macos
-        cp release-artifacts/redis-binaries-macos-latest/redis-macos/server release/redis-server-macos
+        # Copy files to temporary directories
+        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/client redis-linux/
+        cp release-artifacts/redis-binaries-ubuntu-latest/redis-linux/server redis-linux/
+        cp release-artifacts/redis-binaries-macos-latest/redis-macos/client redis-macos/
+        cp release-artifacts/redis-binaries-macos-latest/redis-macos/server redis-macos/
         
-        # Create checksums
+        # Create zip files for each platform
+        zip -r release/redis-linux.zip redis-linux/
+        zip -r release/redis-macos.zip redis-macos/
+        
+        # Create checksums for the zip files
         cd release
-        sha256sum redis-* > checksums.txt
+        sha256sum *.zip > checksums.txt
         
         echo "=== Final release structure ==="
         ls -la
@@ -95,10 +99,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          release/redis-client-linux
-          release/redis-server-linux
-          release/redis-client-macos
-          release/redis-server-macos
+          release/redis-linux.zip
+          release/redis-macos.zip
           release/checksums.txt
         name: Release ${{ github.ref_name }}
         body: |
@@ -107,17 +109,17 @@ jobs:
           This release contains compiled binaries for Linux and macOS.
           
           ### Files:
-          - `redis-client-linux`: Redis client for Linux
-          - `redis-server-linux`: Redis server for Linux
-          - `redis-client-macos`: Redis client for macOS
-          - `redis-server-macos`: Redis server for macOS
+          - `redis-linux.zip`: Complete package for Linux (contains `client` and `server`)
+          - `redis-macos.zip`: Complete package for macOS (contains `client` and `server`)
           - `checksums.txt`: SHA256 checksums for verification
           
           ### Usage:
-          1. Download the appropriate binaries for your platform
-          2. Make them executable: `chmod +x redis-*`
-          3. Run the server: `./redis-server-linux` or `./redis-server-macos`
-          4. In another terminal, run the client: `./redis-client-linux` or `./redis-client-macos`
+          1. Download the appropriate zip file for your platform
+          2. Extract the zip file: `unzip redis-linux.zip` or `unzip redis-macos.zip`
+          3. Navigate to the extracted folder: `cd redis-linux/` or `cd redis-macos/`
+          4. Make binaries executable: `chmod +x client server`
+          5. Run the server: `./server`
+          6. In another terminal, run the client: `./client`
           
         draft: false
         prerelease: false
