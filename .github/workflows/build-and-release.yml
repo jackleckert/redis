@@ -40,13 +40,13 @@ jobs:
         
     - name: Create artifacts
       run: |
-        mkdir -p artifacts
+        mkdir -p artifacts/redis-linux artifacts/redis-macos
         if [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-          cp client artifacts/redis-client-linux
-          cp server artifacts/redis-server-linux
+          cp client artifacts/redis-linux/
+          cp server artifacts/redis-linux/
         else
-          cp client artifacts/redis-client-macos
-          cp server artifacts/redis-server-macos
+          cp client artifacts/redis-macos/
+          cp server artifacts/redis-macos/
         fi
         
     - name: Upload artifacts
@@ -72,33 +72,29 @@ jobs:
         
     - name: Prepare release assets
       run: |
-        mkdir -p release/redis-linux release/redis-macos
+        mkdir -p release
         # Debug: Show what artifacts we actually have
-        find release-artifacts -type f -name "*" | head -20
-        ls -la release-artifacts/
+        echo "=== Artifact structure ==="
+        find release-artifacts -type f | sort
         
-        # Copy Linux binaries
-        if [ -d "release-artifacts/redis-binaries-ubuntu-latest" ]; then
-          find release-artifacts/redis-binaries-ubuntu-latest -name "client" -exec cp {} release/redis-linux/ \;
-          find release-artifacts/redis-binaries-ubuntu-latest -name "server" -exec cp {} release/redis-linux/ \;
-        fi
+        # Copy all files and organize them
+        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux release/ || echo "Ubuntu artifacts not found"
+        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos release/ || echo "macOS artifacts not found" 
         
-        # Copy macOS binaries  
-        if [ -d "release-artifacts/redis-binaries-macos-latest" ]; then
-          find release-artifacts/redis-binaries-macos-latest -name "client" -exec cp {} release/redis-macos/ \;
-          find release-artifacts/redis-binaries-macos-latest -name "server" -exec cp {} release/redis-macos/ \;
-        fi
+        # Create checksums for all binaries
+        find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt || echo "No binaries found for checksums"
         
-        # Create checksums
-        find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt
-        ls -la release/
+        echo "=== Final release structure ==="
+        find release -type f | sort
         
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          release/redis-linux/
-          release/redis-macos/
+          release/redis-linux/client
+          release/redis-linux/server
+          release/redis-macos/client
+          release/redis-macos/server
           release/checksums.txt
         name: Release ${{ github.ref_name }}
         body: |
