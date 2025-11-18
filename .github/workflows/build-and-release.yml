@@ -78,14 +78,11 @@ jobs:
         find release-artifacts -type f | sort
         
         # Copy all files and organize them
-        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux release/redis-linux/ || echo "Ubuntu artifacts not found"
-        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos release/redis-macos/ || echo "macOS artifacts not found" 
+        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux/client release/redis-linux/client
+        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux/server release/redis-linux/server
+        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos/client release/redis-macos/client
+        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos/server release/redis-macos/server
         
-        # Create checksums for all binaries
-        find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt || echo "No binaries found for checksums"
-        
-        echo "=== Final release structure ==="
-        find release -type f | sort
         
     - name: Create Release
       uses: softprops/action-gh-release@v1
