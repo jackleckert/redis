@@ -72,11 +72,23 @@ jobs:
         
     - name: Prepare release assets
       run: |
-        mkdir -p release
+        mkdir -p release/redis-linux release/redis-macos
+        # Debug: Show what artifacts we actually have
+        find release-artifacts -type f -name "*" | head -20
+        ls -la release-artifacts/
+        
         # Copy Linux binaries
-        cp -r release-artifacts/redis-binaries-ubuntu-latest/redis-linux release/
+        if [ -d "release-artifacts/redis-binaries-ubuntu-latest" ]; then
+          find release-artifacts/redis-binaries-ubuntu-latest -name "client" -exec cp {} release/redis-linux/ \;
+          find release-artifacts/redis-binaries-ubuntu-latest -name "server" -exec cp {} release/redis-linux/ \;
+        fi
+        
         # Copy macOS binaries  
-        cp -r release-artifacts/redis-binaries-macos-latest/redis-macos release/
+        if [ -d "release-artifacts/redis-binaries-macos-latest" ]; then
+          find release-artifacts/redis-binaries-macos-latest -name "client" -exec cp {} release/redis-macos/ \;
+          find release-artifacts/redis-binaries-macos-latest -name "server" -exec cp {} release/redis-macos/ \;
+        fi
+        
         # Create checksums
         find release -name "client" -o -name "server" | xargs sha256sum > release/checksums.txt
         ls -la release/
