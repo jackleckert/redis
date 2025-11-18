@@ -29,14 +29,46 @@ Using a TCP socket:
 Create a TCP connection: `connect()`
 
 
-## Build and install
+## Build and Install
 
-To build and and use the TCP server and client, use the following commands:
+### Quick Build
 
+To build the TCP server and client, you can use the provided Makefile:
+
+```bash
+make all
 ```
+
+Or manually with:
+```bash
 g++ -Wall -Wextra -O2 -g src/client.cpp -o client
 g++ -Wall -Wextra -O2 -g src/server.cpp -o server
 ```
 
-To run a session, run the `./server` in a first terminal, and then the `./client` in a second terminal.
+### Available Make Targets
+
+- `make all` - Build both client and server (default)
+- `make client` - Build only the client
+- `make server` - Build only the server  
+- `make clean` - Remove built binaries
+- `make test` - Run basic tests
+- `make install` - Install binaries to /usr/local/bin (requires sudo)
+- `make help` - Show all available targets
+
+### Usage
+
+To run a session:
+1. Run the server in a terminal: `./server`
+2. Run the client in another terminal: `./client`
+3. Type messages in the client to communicate with the server
+4. Type 'exit' in the client to close the connection
+
+### Releases
+
+Pre-built binaries are available on the [Releases page](https://github.com/jackleckert/redis/releases) for Linux and macOS.
+
+To create a new release (for maintainers):
+```bash
+./scripts/release.sh v1.0.0
+```
 
