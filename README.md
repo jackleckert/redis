@@ -1,5 +1,7 @@
-# redis
-Building redis from scratch using C/C++.
+# Redis Clone
+
+This project is a simplified clone of the Redis server, implemented in C++. It provides a basic key-value store with support for strings, sorted sets (zsets), and time-to-live (TTL) expiration for keys.
+
 
 ## Introduction
 
@@ -28,47 +30,125 @@ Using a TCP socket:
 
 Create a TCP connection: `connect()`
 
+## Project Structure
 
-## Build and Install
+The repository is organized into the following directories and key files:
 
-### Quick Build
+-   `src/`: Contains the C++ source code.
+    -   `server.cpp`: The main server logic, including networking, command parsing, and data handling.
+    -   `client.cpp`: A simple command-line client to interact with the server.
+    -   `hashtable.cpp`, `avl.cpp`, `zset.cpp`, `heap.cpp`, `list.cpp`: Implementations of the core data structures.
+    -   `thread_pool.cpp`: A basic thread pool for handling concurrent tasks.
+-   `include/`: Contains the header files for the data structures and common utilities.
+-   `Makefile`: The build script for compiling the server and client.
+-   `README.md`: This file.
 
-To build the TCP server and client, you can use the provided Makefile:
+## Building the Project
+
+You can build the server and client using the provided `Makefile`.
+
+### Prerequisites
+
+-   A C++ compiler that supports C++14 (like `g++` or `clang++`).
+-   `make`
+
+### Compilation
+
+To build both the `server` and `client` binaries, run:
 
 ```bash
 make all
 ```
 
-Or manually with:
+Alternatively, you can build them individually:
+
 ```bash
-g++ -Wall -Wextra -O2 -g src/client.cpp -o client
-g++ -Wall -Wextra -O2 -g src/server.cpp -o server
+# Build only the server
+make server
+
+# Build only the client
+make client
 ```
 
-### Available Make Targets
+## Running the Server
 
-- `make all` - Build both client and server (default)
-- `make client` - Build only the client
-- `make server` - Build only the server  
-- `make clean` - Remove built binaries
-- `make test` - Run basic tests
-- `make install` - Install binaries to /usr/local/bin (requires sudo)
-- `make help` - Show all available targets
+Once built, you can start the server:
 
-### Usage
-
-To run a session:
-1. Run the server in a terminal: `./server`
-2. Run the client in another terminal: `./client`
-3. Type messages in the client to communicate with the server
-4. Type 'exit' in the client to close the connection
-
-### Releases
-
-Pre-built binaries are available on the [Releases page](https://github.com/jackleckert/redis/releases) for Linux and macOS.
-
-To create a new release (for maintainers):
 ```bash
-./scripts/release.sh v1.0.0
+./server
 ```
+
+The server will start listening for connections on `localhost:1234`. If you see a `bind()` error, it means another process is already using that port. You can find and stop it using `lsof -i :1234` and `kill <PID>`.
+
+## Using the Client
+
+The client is a command-line tool for sending commands to the server.
+
+### Syntax
+
+```bash
+./client <command> [arg1] [arg2] ...
+```
+
+### Supported Commands
+
+Here are the commands supported by the server:
+
+#### String Operations
+
+-   **`set <key> <value>`**: Set a string value for a key.
+    ```bash
+    ./client set mykey "hello world"
+    ```
+
+-   **`get <key>`**: Get the string value of a key.
+    ```bash
+    ./client get mykey
+    ```
+
+-   **`del <key>`**: Delete a key.
+    ```bash
+    ./client del mykey
+    ```
+
+#### Key Operations
+
+-   **`keys`**: List all keys in the database.
+    ```bash
+    ./client keys
+    ```
+
+-   **`pexpire <key> <milliseconds>`**: Set a time-to-live (TTL) on a key in milliseconds.
+    ```bash
+    ./client pexpire mykey 5000
+    ```
+
+-   **`pttl <key>`**: Get the remaining time-to-live of a key in milliseconds.
+    ```bash
+    ./client pttl mykey
+    ```
+
+#### Sorted Set (ZSet) Operations
+
+-   **`zadd <zset_key> <score> <member>`**: Add a member with a score to a sorted set.
+    ```bash
+    ./client zadd myzset 10 "member1"
+    ./client zadd myzset 20 "member2"
+    ```
+
+-   **`zrem <zset_key> <member>`**: Remove a member from a sorted set.
+    ```bash
+    ./client zrem myzset "member1"
+    ```
+
+-   **`zscore <zset_key> <member>`**: Get the score of a member in a sorted set.
+    ```bash
+    ./client zscore myzset "member2"
+    ```
+
+-   **`zquery <zset_key> <score> <name> <offset> <limit>`**: Query for members in a sorted set starting from a given score and name, with offset and limit.
+    ```bash
+    # Query for up to 5 members starting from score 0, name ""
+    ./client zquery myzset 0 "" 0 10
+    ```
 
