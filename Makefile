@@ -2,13 +2,14 @@
 
 # Compiler settings
 CXX = g++
-CXXFLAGS = -Wall -Wextra -O2 -g -std=c++11
+CXXFLAGS = -Wall -Wextra -O2 -g -std=c++14 -lpthread
 SRCDIR = src
 INCLUDEDIR = include
 
 # Source files
 CLIENT_SRC = $(SRCDIR)/client.cpp
-SERVER_SRC = $(SRCDIR)/server.cpp
+SERVER_SOURCES = $(wildcard $(SRCDIR)/*.cpp)
+SERVER_SRC = $(filter-out $(CLIENT_SRC), $(SERVER_SOURCES))
 
 # Output binaries
 CLIENT_BIN = client
@@ -25,7 +26,7 @@ $(CLIENT_BIN): $(CLIENT_SRC)
 
 # Build server
 $(SERVER_BIN): $(SERVER_SRC)
-	$(CXX) $(CXXFLAGS) -I$(INCLUDEDIR) $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(INCLUDEDIR) $^ -o $@
 
 # Individual targets for building just one binary
 client: $(CLIENT_BIN)
@@ -77,8 +78,3 @@ help:
 	@echo "  install  - Install binaries to /usr/local/bin (requires sudo)"
 	@echo "  uninstall- Remove binaries from /usr/local/bin (requires sudo)"
 	@echo "  help     - Show this help message"
-
-# Individual targets for building just one binary
-client: $(CLIENT_BIN)
-
-server: $(SERVER_BIN)
